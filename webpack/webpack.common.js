@@ -5,7 +5,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
   entry: {
-    app: Path.resolve(__dirname, '../src/assets/js/index.js')
+	  app: Path.resolve(__dirname, '../src/assets/js/index.js')
   },
   output: {
     path: Path.join(__dirname, '../build'),
@@ -20,14 +20,11 @@ module.exports = {
   plugins: [
     new CleanWebpackPlugin(),
 	  new CopyWebpackPlugin([
-		  { from: Path.resolve(__dirname, '../src/assets/logo'), to: 'src/assets/logo' }
+		  { from: Path.resolve(__dirname, '../src/assets/image'), to: 'src/assets/image' }
 	  ]),
 	  new CopyWebpackPlugin([
-		  { from: Path.resolve(__dirname, '../src/assets/screenshots'), to: 'src/assets/screenshots' }
+		  { from: Path.resolve(__dirname, '../src/assets/models'), to: 'src/assets/models' }
 	  ]),
-    new CopyWebpackPlugin([
-      { from: Path.resolve(__dirname, '../public'), to: 'public' }
-    ]),
     new HtmlWebpackPlugin({
       template: Path.resolve(__dirname, '../src/index.html')
     })

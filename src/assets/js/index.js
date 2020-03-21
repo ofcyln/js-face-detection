@@ -1,53 +1,71 @@
 import '../css/reset.scss';
 import '../css/styles.scss';
 
-import faceapi from 'face-api';
+import * as faceapi from 'face-api.js';
 
-document.addEventListener('DOMContentLoaded', () => {
-	const video = document.querySelector('#video');
+class Execute {
+	constructor() {
+		this.MILISECOND_VALUE = 100;
 
-	const startCamera = () => {
+		this.video = document.querySelector('#video');
+
+		this.promiseFunctions();
+
+		this.videoEventListener();
+	}
+
+	startCamera() {
 		navigator.getUserMedia({
 			video: {}
-		}, stream => (video.srcObject = stream), err => console.log(err));
-	};
+		},
+	stream => (this.video.srcObject = stream),
+	err => console.log('Error: ', err));
+	}
 
-	Promise.all([
-		faceapi.nets.tinyFaceDetector.loadFromUri('/models'),
-		faceapi.nets.faceLandmark68Net.loadFromUri('/models'),
-		faceapi.nets.faceRecognitionNet.loadFromUri('/models'),
-		faceapi.nets.faceExpressionNet.loadFromUri('/models')
-	]).then(startCamera());
+	videoEventListener() {
+		this.video.addEventListener('play', () => {
+			const canvas = faceapi.createCanvasFromMedia(this.video);
 
-	video.addEventListener('play', () => {
-		const canvas = faceapi.createCanvasFromMedia(video);
+			document.body.append(canvas);
 
-		document.body.append(canvas);
+			const boxSize = {
+				width: this.video.width, height: this.video.height
+			};
 
-		const boxSize = {
-			width: video.width, height: video.height
-		};
+			faceapi.matchDimensions(canvas, boxSize);
 
-		faceapi.matchDimensions(canvas, boxSize);
+			const intervalCallback = async() => {
+				const detections = await faceapi
+					.detectAllFaces(this.video, new faceapi.TinyFaceDetectorOptions())
+					.withFaceLandmarks()
+					.withFaceExpressions();
 
-		setInterval(async () => {
-			const detections = await faceapi
-				.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions())
-				.withFaceLandmarks()
-				.withFaceExpressions();
+				canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
 
-			canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+				const resizeDetections = faceapi.resizeResults(detections, boxSize);
 
-			const resizeDetections = faceapi.resizeResults(detections, boxSize);
+				faceapi.draw.drawDetections(canvas, resizeDetections);
 
-			faceapi.draw.drawDetections(canvas, resizeDetections);
+				faceapi.draw.drawFaceLandmarks(canvas, resizeDetections);
 
-			faceapi.draw.drawFaceLandmarks(canvas, resizeDetections);
+				faceapi.draw.drawFaceExpressions(canvas, resizeDetections);
+			};
 
-			faceapi.draw.drawFaceExpressions(canvas, resizeDetections);
+			setInterval(intervalCallback, this.MILISECOND_VALUE);
+		});
+	}
 
-			console.log(detections);
-		}, 100);
-	});
+	promiseFunctions() {
+		return Promise.all([
+			faceapi.nets.tinyFaceDetector.loadFromUri('./src/assets/models'),
+			faceapi.nets.faceLandmark68Net.loadFromUri('./src/assets/models'),
+			faceapi.nets.faceRecognitionNet.loadFromUri('./src/assets/models'),
+			faceapi.nets.faceExpressionNet.loadFromUri('./src/assets/models')
+		]).then(this.startCamera());
+	}
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+	new Execute();
 });
 
