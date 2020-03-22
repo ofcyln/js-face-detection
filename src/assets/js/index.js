@@ -9,6 +9,10 @@ class Execute {
 
 		this.video = document.querySelector('#video');
 
+		this.boxSize = {
+			width: this.video.width, height: this.video.height
+		};
+
 		this.promiseFunctions();
 
 		this.videoEventListener();
@@ -28,40 +32,36 @@ class Execute {
 
 			document.body.append(canvas);
 
-			const boxSize = {
-				width: this.video.width, height: this.video.height
-			};
+			faceapi.matchDimensions(canvas, this.boxSize);
 
-			faceapi.matchDimensions(canvas, boxSize);
-
-			const intervalCallback = async() => {
-				const detections = await faceapi
-					.detectAllFaces(this.video, new faceapi.TinyFaceDetectorOptions())
-					.withFaceLandmarks()
-					.withFaceExpressions();
-
-				canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
-
-				const resizeDetections = faceapi.resizeResults(detections, boxSize);
-
-				faceapi.draw.drawDetections(canvas, resizeDetections);
-
-				faceapi.draw.drawFaceLandmarks(canvas, resizeDetections);
-
-				faceapi.draw.drawFaceExpressions(canvas, resizeDetections);
-			};
-
-			setInterval(intervalCallback, this.MILISECOND_VALUE);
+			setInterval(() => this.intervalCallback(canvas), this.MILISECOND_VALUE);
 		});
 	}
 
+	async intervalCallback(canvas) {
+		const detections = await faceapi
+			.detectAllFaces(this.video, new faceapi.TinyFaceDetectorOptions())
+			.withFaceLandmarks()
+			.withFaceExpressions();
+
+		canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+
+		const resizeDetections = faceapi.resizeResults(detections, this.boxSize);
+
+		faceapi.draw.drawDetections(canvas, resizeDetections);
+
+		faceapi.draw.drawFaceLandmarks(canvas, resizeDetections);
+
+		faceapi.draw.drawFaceExpressions(canvas, resizeDetections);
+	};
+
 	promiseFunctions() {
-		return Promise.all([
+		Promise.all([
 			faceapi.nets.tinyFaceDetector.loadFromUri('./src/assets/models'),
 			faceapi.nets.faceLandmark68Net.loadFromUri('./src/assets/models'),
 			faceapi.nets.faceRecognitionNet.loadFromUri('./src/assets/models'),
 			faceapi.nets.faceExpressionNet.loadFromUri('./src/assets/models')
-		]).then(this.startCamera());
+		]).then(values => this.startCamera());
 	}
 }
 
