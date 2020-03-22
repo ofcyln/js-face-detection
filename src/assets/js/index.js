@@ -3,19 +3,27 @@ import '../css/styles.scss';
 
 import * as faceapi from 'face-api.js';
 
-class Execute {
+class FaceEmotionDetector {
 	constructor() {
 		this.MILISECOND_VALUE = 100;
 
 		this.video = document.querySelector('#video');
 
-		this.boxSize = {
-			width: this.video.width, height: this.video.height
-		};
+		this.getBoxSize();
 
 		this.promiseFunctions();
 
 		this.videoEventListener();
+	}
+
+	getBoxSize() {
+		const positionInfo = this.video.getBoundingClientRect();
+		const height = positionInfo.height;
+		const width = positionInfo.width;
+
+		this.boxSize = {width, height};
+
+		return this.boxSize;
 	}
 
 	startCamera() {
@@ -66,6 +74,6 @@ class Execute {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-	new Execute();
+	new FaceEmotionDetector();
 });
 

@@ -1,3 +1,7 @@
+@mixin position($type: initial) {
+	position: $type;
+}
+
 body {
 	width: 100vw;
 	height: 100vh;
@@ -7,9 +11,51 @@ body {
 }
 
 canvas {
-	position: absolute;
+	@include position(fixed);
 }
 
-video {
-	box-shadow: -2px 12px 20px 0 grey;
+#video {
+	@include position(fixed);
+	top: 50%;
+	left: 50%;
+	min-width: 100%;
+	min-height: 100%;
+	width: auto;
+	height: auto;
+	transform: translateX(-50%) translateY(-50%);
+}
+
+@media screen and (min-width: 800px) {
+	body {
+		background-color: #89b1ab;
+
+		&::before {
+			@include position(fixed);
+			content: 'Face Emotion Detector';
+			top: 7%;
+			font-size: 400%;
+			font-family: Arial, sans-serif;
+			color: #fff;
+		}
+	}
+
+	canvas {
+		@include position(absolute);
+	}
+
+	#video {
+		@include position();
+		width: 720px;
+		height: 540px;
+		top: initial;
+		left: initial;
+		min-width: initial;
+		min-height: initial;
+		transform: translateX(0) translateY(0);
+		background-color: #fff;
+	}
+
+	video {
+		box-shadow: -2px 12px 20px 0 grey;
+	}
 }
