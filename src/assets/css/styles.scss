@@ -1,0 +1,15 @@
+body {
+	width: 100vw;
+	height: 100vh;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+canvas {
+	position: absolute;
+}
+
+video {
+	box-shadow: -2px 12px 20px 0 grey;
+}
