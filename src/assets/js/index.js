@@ -27,11 +27,17 @@ class FaceEmotionDetector {
 	}
 
 	startCamera() {
-		navigator.getUserMedia({
-			video: {}
-		},
-	stream => (this.video.srcObject = stream),
-	err => console.log('Error: ', err));
+		const constraints = {
+			video: {
+				facingMode: "user"
+			},
+			audio: false
+		};
+
+		navigator.mediaDevices
+			.getUserMedia(constraints)
+			.then(stream => (this.video.srcObject = stream))
+			.catch(err => console.log('Error: ', err));
 	}
 
 	videoEventListener() {
